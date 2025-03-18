@@ -68,28 +68,51 @@ public class AuthService {
     
     public void verifyAccount(String token) {
         Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        
         fetchUserAndEnable(verificationToken.orElseThrow(() -> new SpringRedditException("Invalid Token")));
     }
     
     @Transactional
     private void fetchUserAndEnable(VerificationToken verificationToken) {
         String username = verificationToken.getUser().getUsername();
+        System.out.println("fetchUserAndEnable username: "+username);
         User user = userRepository.findByUsername(username).orElseThrow(() -> new SpringRedditException("User not found with name - " + username));
         user.setEnabled(true);
+        System.out.println("fetchUserAndEnable user: "+user);
         userRepository.save(user);
     }
     
     public AuthenticationResponse login(LoginRequest loginRequest) {
-        Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(),
-                loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authenticate);
-        String token = jwtProvider.generateToken(authenticate);
-        return AuthenticationResponse.builder()
-                .authenticationToken(token)
-                .refreshToken(refreshTokenService.generateRefreshToken().getToken())
-                .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
-                .username(loginRequest.getUsername())
-                .build();
+        try {
+            Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getUsername(),
+                    loginRequest.getPassword()
+                )
+            );
+            
+            System.out.println("AuthService AuthenticationResponse userName: "+ loginRequest.getUsername());
+            System.out.println("AuthService AuthenticationResponse pwd: "+ loginRequest.getPassword());
+            System.out.println("AuthService AuthenticationResponse name: "+ authenticate.getName());
+            System.out.println("AuthService AuthenticationResponse Auth: "+ authenticate.getAuthorities());
+            System.out.println("AuthService AuthenticationResponse detail: "+ authenticate.getDetails());
+            System.out.println("AuthService AuthenticationResponse Principal: "+ authenticate.getPrincipal());
+            System.out.println("AuthService AuthenticationResponse getCredentials: "+ authenticate.getCredentials());
+            
+            SecurityContextHolder.getContext().setAuthentication(authenticate);
+            String token = jwtProvider.generateToken(authenticate);
+
+            return AuthenticationResponse.builder()
+                    .authenticationToken(token)
+                    .refreshToken(refreshTokenService.generateRefreshToken().getToken())
+                    .expiresAt(Instant.now().plusMillis(jwtProvider.getJwtExpirationInMillis()))
+                    .username(loginRequest.getUsername())
+                    .build();
+
+        } catch (Exception e) {
+            throw new SpringRedditException("Invalid username or password", e);
+        }
     }
+
     
 }

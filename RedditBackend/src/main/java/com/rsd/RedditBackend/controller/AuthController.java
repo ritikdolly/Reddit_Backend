@@ -38,6 +38,8 @@ public class AuthController {
     
     @PostMapping("/login")
     public AuthenticationResponse login(@RequestBody LoginRequest loginRequest) {
+    	System.out.println("ctrls login= "+loginRequest.getUsername());
+    	System.out.println("ctrls login= "+loginRequest.getPassword());
         return authService.login(loginRequest);
     }
     

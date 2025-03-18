@@ -26,6 +26,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOptional = userRepository.findByUsername(username);
+        
+        System.out.println("userDetailServiceImp userName: "+username);
+        System.out.println("userDetailServiceImp userOptional: "+userOptional);
         User user = userOptional
                 .orElseThrow(() -> new UsernameNotFoundException("No user " +
                         "Found with username : " + username));
@@ -37,6 +40,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {
+    	System.out.println("userDetailServiceImp role: "+role);
         return Collections.singletonList(new SimpleGrantedAuthority(role)); // ✅ Fixed
     }
 }
