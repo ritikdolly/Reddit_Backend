@@ -42,67 +42,83 @@ public class JwtProvider {
     public void init() {
         try {
             keyStore = KeyStore.getInstance("JKS");
-            System.out.println("🔵 Loading KeyStore from: " + keystoreLocation);
+            log.info("Loading KeyStore from: {}", keystoreLocation);
             
             InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(keystoreLocation);
             if (resourceAsStream == null) {
-                throw new SpringRedditException("❌ Keystore file not found at: " + keystoreLocation);
+                throw new SpringRedditException("Keystore file not found at: " + keystoreLocation);
             }
 
             keyStore.load(resourceAsStream, keystorePassword.toCharArray());
-            System.out.println("✅ Keystore loaded successfully.");
+            log.info("Keystore loaded successfully.");
         } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | java.io.IOException e) {
-            throw new SpringRedditException("🔥 Exception occurred while loading keystore", e);
+            throw new SpringRedditException("Exception occurred while loading keystore", e);
         }
     }
 
     public String generateToken(Authentication authentication) {
         User principal = (User) authentication.getPrincipal();
-        System.out.println("🟢 Generating token for user: " + principal.getUsername());
+        log.info("Generating token for user: {}", principal.getUsername());
 
-        return Jwts.builder()
+        PrivateKey privateKey = getPrivateKey();
+        if (privateKey == null) {
+            throw new SpringRedditException("Private key is null. JWT signing will fail.");
+        }
+
+        String token = Jwts.builder()
                 .setSubject(principal.getUsername())
                 .setIssuedAt(from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
-                .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
+                .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
+
+        log.info("Generated JWT Token: {}", token);
+        return token;
     }
 
     public String generateTokenWithUserName(String username) {
         log.info("Generating token for user: {}", username);
-        return Jwts.builder()
+
+        PrivateKey privateKey = getPrivateKey();
+        if (privateKey == null) {
+            throw new SpringRedditException("Private key is null. JWT signing will fail.");
+        }
+
+        String token = Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
-                .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
+                .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
+
+        log.info("Generated JWT Token: {}", token);
+        return token;
     }
 
     private PrivateKey getPrivateKey() {
         try {
             Key key = keyStore.getKey(keyAlias, keystorePassword.toCharArray());
-            System.out.println("key in jwtProvider getPrivatekey: "+key);
             if (key == null) {
-                throw new SpringRedditException("❌ Private key not found for alias: " + keyAlias);
+                throw new SpringRedditException("Private key not found for alias: " + keyAlias);
             }
-            System.out.println("🔑 Private Key Loaded Successfully.");
+            log.info("Private Key Loaded Successfully.");
             return (PrivateKey) key;
         } catch (Exception e) {
-            throw new SpringRedditException("🔥 Error retrieving private key from keystore", e);
+            throw new SpringRedditException("Error retrieving private key from keystore", e);
         }
     }
 
     public boolean validateToken(String jwt) {
         try {
-            System.out.println("🟢 Validating JWT: " + jwt);
+            log.info("Validating JWT: {}", jwt);
             Jwts.parserBuilder()
                 .setSigningKey(getPublicKey())
                 .build()
                 .parseClaimsJws(jwt);
-            System.out.println("✅ JWT Token is valid.");
+            log.info("JWT Token is valid.");
             return true;
         } catch (Exception e) {
-            System.out.println("❌ JWT Token validation failed: " + e.getMessage());
+            log.error("JWT Token validation failed: {}", e.getMessage());
             return false;
         }
     }
@@ -111,11 +127,11 @@ public class JwtProvider {
         try {
             Certificate cert = keyStore.getCertificate(keyAlias);
             if (cert == null) {
-                throw new SpringRedditException("❌ Certificate not found for alias: " + keyAlias);
+                throw new SpringRedditException("Certificate not found for alias: " + keyAlias);
             }
             return cert.getPublicKey();
         } catch (KeyStoreException e) {
-            throw new SpringRedditException("🔥 Error retrieving public key from keystore", e);
+            throw new SpringRedditException("Error retrieving public key from keystore", e);
         }
     }
 
