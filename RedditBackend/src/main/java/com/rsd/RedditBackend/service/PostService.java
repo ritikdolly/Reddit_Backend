@@ -44,6 +44,7 @@ public class PostService {
     public PostResponse getPost(Long id) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id.toString()));
+        
         return postMapper.mapToDto(post);
     }
 
@@ -72,4 +73,11 @@ public class PostService {
                 .map(postMapper::mapToDto)
                 .collect(toList());
     }
+    
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+        postRepository.delete(post);
+    }
+
 }

@@ -26,6 +26,7 @@ public class SubredditService {
     @Transactional
     public SubredditDto save(SubredditDto subredditDto) {
         Subreddit save = subredditRepository.save(subredditMapper.mapDtoToSubreddit(subredditDto));
+//        System.out.println("Number of Posts: " + subredditDto.getNumberOfPosts());
         subredditDto.setId(save.getId());
         return subredditDto;
     }

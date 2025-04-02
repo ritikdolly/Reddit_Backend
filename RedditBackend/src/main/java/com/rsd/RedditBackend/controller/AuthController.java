@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.rsd.RedditBackend.request.LoginRequest;
 import com.rsd.RedditBackend.request.RefreshTokenRequest;
@@ -45,11 +46,17 @@ public class AuthController {
         System.out.println("Username: " + loginRequest.getUsername());
         System.out.println("Password: " + loginRequest.getPassword());
 
-        AuthenticationResponse response = authService.login(loginRequest);
-        
-        System.out.println("Login Response: " + response);
-        return response;
+        try {
+            AuthenticationResponse response = authService.login(loginRequest);
+            System.out.println("Login Response: " + response);
+            return response;
+        } catch (Exception e) {
+            System.err.println("Error during login: " + e.getMessage());
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Login failed", e);
+        }
     }
+
 
     @PostMapping("/refresh/token")
     public AuthenticationResponse refreshTokens(@Valid @RequestBody RefreshTokenRequest refreshTokenRequest) {

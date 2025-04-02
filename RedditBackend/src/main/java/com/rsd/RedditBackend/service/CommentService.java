@@ -15,8 +15,11 @@ import com.rsd.RedditBackend.repository.CommentRepository;
 import com.rsd.RedditBackend.repository.PostRepository;
 import com.rsd.RedditBackend.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 import static java.util.stream.Collectors.toList;
 
+import java.time.Instant;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -36,6 +39,14 @@ public class CommentService {
     public void save(CommentsDto commentsDto) {
         Post post = postRepository.findById(commentsDto.getPostId())
                 .orElseThrow(() -> new PostNotFoundException(commentsDto.getPostId().toString()));
+//        System.out.println("commentService Save");
+//        System.out.println(commentsDto.getUserName());
+//    	System.out.println(commentsDto.getText());
+//    	System.out.println(commentsDto.getPostId());
+//    	System.out.println(commentsDto.getCreatedDate());
+    	System.out.println("post at commentService"+post.getPostId());
+    	
+    	
         Comment comment = commentMapper.map(commentsDto, post, authService.getCurrentUser());
         commentRepository.save(comment);
 
@@ -47,6 +58,7 @@ public class CommentService {
         mailService.sendMail(new NotificationEmail(user.getUsername() + " Commented on your post", user.getEmail(), message));
     }
 
+    @Transactional
     public List<CommentsDto> getAllCommentsForPost(Long postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException(postId.toString()));

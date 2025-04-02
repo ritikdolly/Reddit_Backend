@@ -41,6 +41,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private Collection<? extends GrantedAuthority> getAuthorities(String role) {
     	System.out.println("userDetailServiceImp role: "+role);
-        return Collections.singletonList(new SimpleGrantedAuthority(role)); // ✅ Fixed
+        return Collections.singletonList(new SimpleGrantedAuthority(role)); 
     }
 }

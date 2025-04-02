@@ -64,6 +64,7 @@ public class AuthService {
     public User getCurrentUser() {
         org.springframework.security.core.userdetails.User principal = (org.springframework.security.core.userdetails.User) SecurityContextHolder.
                 getContext().getAuthentication().getPrincipal();
+        System.out.println("AuthService getCurrentUser : "+principal.getUsername());
         return userRepository.findByUsername(principal.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User name not found - " + principal.getUsername()));
     }

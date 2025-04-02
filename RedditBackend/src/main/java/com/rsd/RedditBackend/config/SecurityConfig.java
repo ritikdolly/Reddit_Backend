@@ -35,18 +35,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors().and() 
-                .csrf().disable() 
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/subreddit/**").permitAll()
-                        .requestMatchers("/api/posts/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**").permitAll()
-                        .anyRequest().authenticated() 
-                )
-                .sessionManagement(session -> 
-                        session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS)) // ✅ Ensure stateless authentication
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // ✅ JWT Filter
+            .cors().and()
+            .csrf().disable()
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/subreddit/**",
+                    "/api/posts/**",
+                    "/api/comments/**",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/api/votes/**",
+                    "/webjars/**"
+                ).permitAll()
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> 
+                session.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -61,7 +67,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200")); // ✅ Allow Angular frontend
+        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(Collections.singletonList("*"));
         config.setExposedHeaders(Collections.singletonList("Authorization"));
