@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
 @EnableAsync
 @ComponentScan(basePackages = "com.rsd.RedditBackend")
+
 public class RedditBackendApplication {
 
 	public static void main(String[] args) {

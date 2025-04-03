@@ -1,7 +1,10 @@
 package com.rsd.RedditBackend.exception;
 
 public class SpringRedditException extends RuntimeException {
-    public SpringRedditException(String exMessage, Exception exception) {
+  
+	private static final long serialVersionUID = 1L;
+
+	public SpringRedditException(String exMessage, Exception exception) {
         super(exMessage, exception);
     }
 
