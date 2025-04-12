@@ -54,7 +54,6 @@ public class CommentsController {
 	}
 
 
-
 	@GetMapping("/by-post/{postId}")
 	public ResponseEntity<List<CommentsDto>> getAllCommentsForPost(@PathVariable Long postId) {
 		System.out.println("GetAllComment Controller"+ postId);

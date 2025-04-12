@@ -17,7 +17,6 @@ public interface SubredditMapper {
     SubredditDto mapSubredditToDto(Subreddit subreddit);
 
     default Integer mapPosts(List<Post> numberOfPosts) {
-    	   System.out.println("Post List: " + numberOfPosts); 
     	return (numberOfPosts != null) ? numberOfPosts.size() : 0;
     }
 
